@@ -1,33 +1,48 @@
 <template>
   <div id="app">
-    <h1>Vue Todo App</h1>
-    <div class="add-task-wrapper">
-      <input type="text" v-model="newTaskInput" @keydown.enter="addTask" />
-      <button @click="addTask">Add task</button>
+    <link
+      href="//netdna.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+
+    <div class="card text-center m-3">
+      <h3 class="card-header">一覧画面</h3>
+      <br />
+      <div class="card-body">
+        <div v-for="task in pageOfItems" :key="task.id">
+          <span>{{ task.id }}</span> <span>{{ task.name }}</span>
+        </div>
+      </div>
+      <div class="card-footer pb-0 pt-3">
+        <jw-pagination
+          :labels="customLabels"
+          :items="tasks"
+          @changePage="onChangePage"
+        ></jw-pagination>
+      </div>
     </div>
 
-    <div class="task" v-for="task in tasks" :key="task.id">
-      <span>{{ task.id }}</span
-      >
-      <span>{{ task.name }}</span
-      ><span class="delete"
-        ><button @click="removeTask(task.id)">X</button></span
-      >
-    </div>
     <button v-on:click="downloadCSV">
-  ダウンロード
-</button>
+      ダウンロード
+    </button>
   </div>
 </template>
 
-
 <script>
+const customLabels = {
+  first: "最初",
+  last: "最後",
+  previous: "<",
+  next: ">",
+};
 export default {
   name: "App",
   data() {
     return {
       newTaskInput: "",
       tasks: [],
+      customLabels,
+      pageOfItems: [],
     };
   },
   async created() {
@@ -37,53 +52,22 @@ export default {
     this.tasks = await response.json();
   },
   methods: {
-    async addTask() {
-      let taskId = String(Math.floor(
-        Math.random() * (999999999 - 100000000) + 1000000000
-      ));
-      let newTask = {
-        id: taskId,
-        name: this.newTaskInput,
-      };
-      await fetch(
-        "https://5gprlny6jj.execute-api.ap-northeast-1.amazonaws.com/todos",
-        {
-          method: "post",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(newTask),
-        }
-      );
-      this.tasks.push(newTask);
-      this.newTaskInput = "";
+    downloadCSV() {
+      var csv = "\ufeff" + "id,name\n";
+      this.pageOfItems.forEach((el) => {
+        var line = el["id"] + "," + el["name"] + "\n";
+        csv += line;
+      });
+      let blob = new Blob([csv], { type: "text/csv" });
+      let link = document.createElement("a");
+      link.href = window.URL.createObjectURL(blob);
+      link.download = "Result.csv";
+      link.click();
     },
-    downloadCSV () {
-      var csv = '\ufeff' + 'id,name\n'
-      this.tasks.forEach(el => {
-        var line = el['id'] + ',' + el['name'] + '\n'
-        csv += line
-      })
-      let blob = new Blob([csv], { type: 'text/csv' })
-      let link = document.createElement('a')
-      link.href = window.URL.createObjectURL(blob)
-      link.download = 'Result.csv'
-      link.click()
-    },
-    
 
-    async removeTask(taskId) {
-      await fetch(
-        "https://5gprlny6jj.execute-api.ap-northeast-1.amazonaws.com/todos",
-        {
-          method: "delete",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ id: taskId }),
-        }
-      );
-      this.tasks = this.tasks.filter((t) => t.id !== taskId);
+    onChangePage(pageOfItems) {
+      // update page of items
+      this.pageOfItems = pageOfItems;
     },
   },
 };
