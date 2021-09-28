@@ -43,15 +43,25 @@ export default {
       tasks: [],
       customLabels,
       pageOfItems: [],
+      timer: "", 
     };
   },
   async created() {
-    const response = await fetch(
-      "https://5gprlny6jj.execute-api.ap-northeast-1.amazonaws.com/todos"
-    );
-    this.tasks = await response.json();
+    this.fetchData()
+    
+    this.timer = setInterval(this.fetchData, 2000);
   },
   methods: {
+    async fetchData() {
+      const response = await fetch("https://5gprlny6jj.execute-api.ap-northeast-1.amazonaws.com/todos")
+      this.tasks = await response.json();
+    },
+
+    cancelAutoUpdate() {  
+      clearInterval(this.timer);  
+    },
+
+
     downloadCSV() {
       var csv = "\ufeff" + "id,name\n";
       this.pageOfItems.forEach((el) => {
@@ -69,6 +79,9 @@ export default {
       // update page of items
       this.pageOfItems = pageOfItems;
     },
+  },
+  beforeDestroy() {  
+    this.cancelAutoUpdate();  
   },
 };
 </script>
