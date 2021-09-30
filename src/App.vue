@@ -39,28 +39,43 @@ export default {
   name: "App",
   data() {
     return {
-      newTaskInput: "",
       tasks: [],
-      customLabels,
+
       pageOfItems: [],
-      timer: "", 
+
+      customLabels,
+
+      timer: "",
     };
   },
-  async created() {
-    this.fetchData()
-    
-    this.timer = setInterval(this.fetchData, 2000);
+
+  computed: {
+    savedtask() {
+      return this.$store.state.tasks;
+    },
   },
+
+  async created() {
+    this.fetchData();
+
+    this.timer = setInterval(this.fetchData, 5000);
+
+  },
+
   methods: {
+    
     async fetchData() {
-      const response = await fetch("https://5gprlny6jj.execute-api.ap-northeast-1.amazonaws.com/todos")
+      const response = await fetch(
+        "https://5gprlny6jj.execute-api.ap-northeast-1.amazonaws.com/todos"
+      );
       this.tasks = await response.json();
+      console.log(this.tasks);
+      this.$store.commit("refresh");
     },
 
-    cancelAutoUpdate() {  
-      clearInterval(this.timer);  
+    cancelAutoUpdate() {
+      clearInterval(this.timer);
     },
-
 
     downloadCSV() {
       var csv = "\ufeff" + "id,name\n";
@@ -80,8 +95,8 @@ export default {
       this.pageOfItems = pageOfItems;
     },
   },
-  beforeDestroy() {  
-    this.cancelAutoUpdate();  
+  beforeDestroy() {
+    this.cancelAutoUpdate();
   },
 };
 </script>
