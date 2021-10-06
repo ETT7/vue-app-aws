@@ -24,7 +24,7 @@ const store = new Vuex.Store({
     })
   ],
   mutations: {
-    refresh: (state) => state.savedtask,
+    refresh: (state, payload) => state.savedtask = payload,
     
   }
 });

@@ -46,20 +46,24 @@ export default {
       customLabels,
 
       timer: "",
+
     };
   },
 
   computed: {
     savedtask() {
-      return this.$store.state.tasks;
+      return this.$store.state.savedtask;
     },
   },
 
   async created() {
     this.fetchData();
 
-    this.timer = setInterval(this.fetchData, 5000);
+    this.timer = setInterval(this.fetchData, 9000000000);
 
+  },
+  async beforeUpdate() {
+    this.$store.commit("refresh", this.tasks);
   },
 
   methods: {
@@ -70,7 +74,7 @@ export default {
       );
       this.tasks = await response.json();
       console.log(this.tasks);
-      this.$store.commit("refresh");
+      
     },
 
     cancelAutoUpdate() {
@@ -88,6 +92,7 @@ export default {
       link.href = window.URL.createObjectURL(blob);
       link.download = "Result.csv";
       link.click();
+      
     },
 
     onChangePage(pageOfItems) {
@@ -97,6 +102,7 @@ export default {
   },
   beforeDestroy() {
     this.cancelAutoUpdate();
+    
   },
 };
 </script>
